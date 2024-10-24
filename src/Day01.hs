@@ -18,21 +18,22 @@ day01 = do
 part1 :: [String] -> Int
 part1 =
   sum
-    . map (liftA2 (+) ((10 *) . digitToInt . head) (digitToInt . last) . filter isDigit)
-    . filter (any isDigit)
+    . map (liftA2 (+) ((10 *) . digitToInt . head) (digitToInt . last))
+    . filter (not . null)
+    . map (filter isDigit)
 
 part2 :: [String] -> Int
-part2 =
-  sum
-    . map
-      ( liftA2 (+) ((10 *) . head) last
-          . map fst
-          . sortBy (comparing snd)
-          . map (fst &&& (fst . snd))
-          . concat
-          . flip map numMap
-          . matchDigit
-      )
+part2 = sum . map digitsFromLine
+
+digitsFromLine :: String -> Int
+digitsFromLine =
+  liftA2 (+) ((10 *) . head) last
+    . map fst
+    . sortBy (comparing snd)
+    . map (fst &&& (fst . snd))
+    . concat
+    . flip map numMap
+    . matchDigit
 
 matchDigit :: String -> (String, Int) -> [(Int, (Int, String))]
 matchDigit =
@@ -42,11 +43,7 @@ matchDigit =
     . flip (slidingWindow . length . fst)
 
 slidingWindow :: Int -> [a] -> [[a]]
-slidingWindow =
-  liftA2
-    (.)
-    (takeWhile . ((. length) . (==)))
-    ((. tails) . map . take)
+slidingWindow n = takeWhile ((n==) . length) . map (take n) . tails
 
 numMap :: [(String, Int)]
 numMap =
@@ -69,3 +66,4 @@ numMap =
     ("eight", 8),
     ("nine", 9)
   ]
+
